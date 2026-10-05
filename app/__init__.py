@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import Config
@@ -18,6 +18,6 @@ def create_app():
 
     @app.route('/')
     def home():
-        return 'CampusLoop is running'
+        return render_template('index.html')
 
     return app
