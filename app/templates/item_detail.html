@@ -72,6 +72,28 @@
         {% endfor %}
         {% endif %}
 
+        {% if matches %}
+        <h4 class="mt-4">Possible matches</h4>
+        {% for m in matches %}
+        <a href="{{ url_for('lostfound.item_detail', item_id=m.item.id) }}" class="text-decoration-none text-reset">
+            <div class="card mb-2">
+                <div class="card-body d-flex align-items-center">
+                    {% if m.item.image_filename %}
+                    <img src="{{ url_for('static', filename='uploads/' + m.item.image_filename) }}"
+                         class="rounded me-3" style="width:80px;height:80px;object-fit:cover;" alt="{{ m.item.title }}">
+                    {% endif %}
+                    <div>
+                        <strong>{{ m.item.title }}</strong>
+                        <span class="badge bg-primary">{{ m.score }}% match</span>
+                        {% if m.photo_match %}<span class="badge bg-success">Similar photo</span>{% endif %}
+                        <div class="text-muted small">{{ m.item.category }} &middot; {{ m.item.location }}</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+        {% endif %}
+        
         <a href="{{ url_for('lostfound.items') }}" class="btn btn-outline-secondary mt-3">Back to list</a>
     </div>
 </div>

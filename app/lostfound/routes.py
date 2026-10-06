@@ -1,3 +1,4 @@
+import re
 import os
 import uuid
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
@@ -96,11 +97,14 @@ def new_item():
 def item_detail(item_id):
     item = db.get_or_404(Item, item_id)
     my_claim = None
+    matches = []
     if current_user.is_authenticated:
         my_claim = (Claim.query
                     .filter_by(item_id=item.id, claimant_id=current_user.id)
                     .order_by(Claim.created_at.desc()).first())
-    return render_template('item_detail.html', item=item, my_claim=my_claim)
+        if item.user_id == current_user.id and not item.is_resolved:
+            matches = find_matches(item)
+    return render_template('item_detail.html', item=item, my_claim=my_claim, matches=matches)
 
 
 @lostfound.route('/items/<int:item_id>/claim', methods=['POST'])
@@ -148,3 +152,48 @@ def handle_claim(claim_id, action):
         flash('Invalid action.', 'danger')
 
     return redirect(url_for('lostfound.item_detail', item_id=item.id))
+
+STOPWORDS = {'the', 'and', 'with', 'for', 'near', 'from', 'this', 'that',
+             'have', 'has', 'was', 'are', 'lost', 'found', 'item', 'one'}
+
+
+def keywords(text):
+    words = re.findall(r'[a-z0-9]+', (text or '').lower())
+    return {w for w in words if len(w) > 2 and w not in STOPWORDS}
+
+
+def find_matches(item, limit=5):
+    opposite = 'found' if item.status == 'lost' else 'lost'
+    candidates = Item.query.filter(
+        Item.status == opposite,
+        Item.is_resolved.is_(False),
+        Item.id != item.id
+    ).all()
+
+    my_words = keywords(f"{item.title} {item.description}")
+    my_hash = imagehash.hex_to_hash(item.image_hash) if item.image_hash else None
+
+    results = []
+    for c in candidates:
+        score = 0
+        photo_match = False
+
+        if c.category == item.category:
+            score += 30
+
+        shared = my_words & keywords(f"{c.title} {c.description}")
+        score += min(len(shared) * 15, 30)
+
+        if my_hash is not None and c.image_hash:
+            distance = my_hash - imagehash.hex_to_hash(c.image_hash)
+            if distance <= 10:
+                score += 40
+                photo_match = True
+            elif distance <= 16:
+                score += 20
+
+        if score >= 45:
+            results.append({'item': c, 'score': score, 'photo_match': photo_match})
+
+    results.sort(key=lambda r: r['score'], reverse=True)
+    return results[:limit]
