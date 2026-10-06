@@ -12,8 +12,13 @@ def create_app():
     app.config.from_object(Config)
     db.init_app(app)
     login_manager.init_app(app)
+
     from app.auth.routes import auth
     app.register_blueprint(auth)
+
+    from app.lostfound.routes import lostfound
+    app.register_blueprint(lostfound)
+
     from app import models
     with app.app_context():
         db.create_all()

@@ -10,6 +10,12 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('home') }}">CampusLoop</a>
+            <div class="me-auto ms-4">
+                <a class="text-light text-decoration-none me-3" href="{{ url_for('lostfound.items') }}">Lost &amp; Found</a>
+                {% if current_user.is_authenticated %}
+                <a class="text-light text-decoration-none" href="{{ url_for('lostfound.new_item') }}">Post Item</a>
+                {% endif %}
+            </div>
             <div class="ms-auto">
                 {% if current_user.is_authenticated %}
                     <a class="navbar-text me-3 text-decoration-none" href="{{ url_for('auth.profile') }}">Hi, {{ current_user.name }}</a>

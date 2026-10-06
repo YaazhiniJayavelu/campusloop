@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}{{ item.title }} - CampusLoop{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <span class="badge {{ 'bg-danger' if item.status == 'lost' else 'bg-success' }}">{{ item.status|upper }}</span>
+        <h2 class="mt-2">{{ item.title }}</h2>
+        {% if item.image_filename %}
+        <img src="{{ url_for('static', filename='uploads/' + item.image_filename) }}"
+             class="img-fluid rounded mb-3" alt="{{ item.title }}">
+        {% endif %}
+        <p><strong>Category:</strong> {{ item.category }}</p>
+        <p><strong>Location:</strong> {{ item.location }}</p>
+        <p><strong>Description:</strong> {{ item.description or 'No description' }}</p>
+        <p class="text-muted">Posted by {{ item.owner.name }} on {{ item.created_at.strftime('%d %b %Y') }}</p>
+        <a href="{{ url_for('lostfound.items') }}" class="btn btn-outline-secondary">Back to list</a>
+    </div>
+</div>
+{% endblock %}
