@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Profile - CampusLoop{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-3">My Profile</h2>
+        <div class="card">
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ current_user.name }}</p>
+                <p><strong>Email:</strong> {{ current_user.email }}</p>
+                <p><strong>Department:</strong> {{ current_user.department or 'Not set' }}</p>
+                <p><strong>Year:</strong> {{ current_user.year or 'Not set' }}</p>
+                <p class="mb-0"><strong>Joined:</strong> {{ current_user.created_at.strftime('%d %b %Y') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
