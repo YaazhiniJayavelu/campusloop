@@ -5,6 +5,32 @@
     <h2>Lost &amp; Found</h2>
     <a href="{{ url_for('lostfound.new_item') }}" class="btn btn-primary">Post item</a>
 </div>
+<form method="GET" class="row g-2 mb-4">
+    <div class="col-md-4">
+        <input type="text" name="q" value="{{ q }}" class="form-control"
+               placeholder="Search title, description, location">
+    </div>
+    <div class="col-md-3">
+        <select name="category" class="form-select">
+            <option value="">All categories</option>
+            {% for c in categories %}
+            <option value="{{ c }}" {{ 'selected' if c == category }}>{{ c }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="status" class="form-select">
+            <option value="">Lost &amp; Found</option>
+            <option value="lost" {{ 'selected' if status == 'lost' }}>Lost</option>
+            <option value="found" {{ 'selected' if status == 'found' }}>Found</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="{{ url_for('lostfound.items') }}" class="btn btn-outline-secondary">Clear</a>
+    </div>
+</form>
+
 <div class="row">
     {% for item in items %}
     <div class="col-md-4 mb-4">
@@ -22,7 +48,7 @@
         </div>
     </div>
     {% else %}
-    <p class="text-muted">No items posted yet.</p>
+    <p class="text-muted">No items found.</p>
     {% endfor %}
 </div>
 {% endblock %}

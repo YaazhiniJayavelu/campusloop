@@ -37,9 +37,26 @@ def save_photo(file):
 
 @lostfound.route('/items')
 def items():
-    all_items = Item.query.order_by(Item.created_at.desc()).all()
-    return render_template('items.html', items=all_items)
+    q = request.args.get('q', '').strip()
+    category = request.args.get('category', '')
+    status = request.args.get('status', '')
 
+    query = Item.query
+    if q:
+        like = f'%{q}%'
+        query = query.filter(db.or_(
+            Item.title.ilike(like),
+            Item.description.ilike(like),
+            Item.location.ilike(like)
+        ))
+    if category in CATEGORIES:
+        query = query.filter_by(category=category)
+    if status in ('lost', 'found'):
+        query = query.filter_by(status=status)
+
+    all_items = query.order_by(Item.created_at.desc()).all()
+    return render_template('items.html', items=all_items, categories=CATEGORIES,
+                           q=q, category=category, status=status)
 
 @lostfound.route('/items/new', methods=['GET', 'POST'])
 @login_required
