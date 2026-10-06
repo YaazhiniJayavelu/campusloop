@@ -13,7 +13,66 @@
         <p><strong>Location:</strong> {{ item.location }}</p>
         <p><strong>Description:</strong> {{ item.description or 'No description' }}</p>
         <p class="text-muted">Posted by {{ item.owner.name }} on {{ item.created_at.strftime('%d %b %Y') }}</p>
-        <a href="{{ url_for('lostfound.items') }}" class="btn btn-outline-secondary">Back to list</a>
+
+        {% if item.is_resolved %}
+        <div class="alert alert-success">
+            This item has been resolved.
+            {% if my_claim and my_claim.status == 'approved' %}
+            <br>Your claim was approved. Contact the poster: <strong>{{ item.owner.email }}</strong>
+            {% endif %}
+        </div>
+        {% elif not current_user.is_authenticated %}
+        <div class="alert alert-secondary">
+            <a href="{{ url_for('auth.login') }}">Log in</a> to send a claim.
+        </div>
+        {% elif current_user.id != item.user_id %}
+            {% if my_claim and my_claim.status == 'pending' %}
+            <div class="alert alert-info">Your claim is pending approval.</div>
+            {% else %}
+            {% if my_claim and my_claim.status == 'rejected' %}
+            <div class="alert alert-warning">Your last claim was rejected. You can send a new one.</div>
+            {% endif %}
+            <form method="POST" action="{{ url_for('lostfound.send_claim', item_id=item.id) }}" class="mb-3">
+                <label class="form-label">
+                    {{ 'Why is this yours? (identifying marks, contents)' if item.status == 'found' else 'Where did you find it? Add any details' }}
+                </label>
+                <textarea name="message" class="form-control mb-2" rows="3" required></textarea>
+                <button type="submit" class="btn btn-success">
+                    {{ 'Claim this item' if item.status == 'found' else 'I found this' }}
+                </button>
+            </form>
+            {% endif %}
+        {% endif %}
+
+        {% if current_user.is_authenticated and current_user.id == item.user_id %}
+        <h4 class="mt-4">Claims on this item</h4>
+        {% for claim in item.claims %}
+        <div class="card mb-2">
+            <div class="card-body">
+                <p class="mb-1">
+                    <strong>{{ claim.claimant.name }}</strong>
+                    <span class="badge bg-{{ 'warning text-dark' if claim.status == 'pending' else ('success' if claim.status == 'approved' else 'secondary') }}">{{ claim.status }}</span>
+                </p>
+                <p class="mb-2">{{ claim.message }}</p>
+                {% if claim.status == 'approved' %}
+                <p class="mb-0"><strong>Contact:</strong> {{ claim.claimant.email }}</p>
+                {% endif %}
+                {% if claim.status == 'pending' and not item.is_resolved %}
+                <form method="POST" action="{{ url_for('lostfound.handle_claim', claim_id=claim.id, action='approve') }}" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                </form>
+                <form method="POST" action="{{ url_for('lostfound.handle_claim', claim_id=claim.id, action='reject') }}" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <p class="text-muted">No claims yet.</p>
+        {% endfor %}
+        {% endif %}
+
+        <a href="{{ url_for('lostfound.items') }}" class="btn btn-outline-secondary mt-3">Back to list</a>
     </div>
 </div>
 {% endblock %}

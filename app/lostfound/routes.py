@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 from PIL import Image
 import imagehash
 from app import db
-from app.models import Item
+from app.models import Item, Claim
 
 lostfound = Blueprint('lostfound', __name__)
 
@@ -95,4 +95,56 @@ def new_item():
 @lostfound.route('/items/<int:item_id>')
 def item_detail(item_id):
     item = db.get_or_404(Item, item_id)
-    return render_template('item_detail.html', item=item)
+    my_claim = None
+    if current_user.is_authenticated:
+        my_claim = (Claim.query
+                    .filter_by(item_id=item.id, claimant_id=current_user.id)
+                    .order_by(Claim.created_at.desc()).first())
+    return render_template('item_detail.html', item=item, my_claim=my_claim)
+
+
+@lostfound.route('/items/<int:item_id>/claim', methods=['POST'])
+@login_required
+def send_claim(item_id):
+    item = db.get_or_404(Item, item_id)
+    if item.user_id == current_user.id:
+        flash('You cannot claim your own post.', 'danger')
+    elif item.is_resolved:
+        flash('This item is already resolved.', 'danger')
+    elif Claim.query.filter_by(item_id=item.id, claimant_id=current_user.id,
+                               status='pending').first():
+        flash('You already sent a claim for this item.', 'warning')
+    else:
+        claim = Claim(item_id=item.id, claimant_id=current_user.id,
+                      message=request.form.get('message', '').strip())
+        db.session.add(claim)
+        db.session.commit()
+        flash('Claim sent. The poster will review it.', 'success')
+    return redirect(url_for('lostfound.item_detail', item_id=item.id))
+
+@lostfound.route('/claims/<int:claim_id>/<action>', methods=['POST'])
+@login_required
+def handle_claim(claim_id, action):
+    claim = db.get_or_404(Claim, claim_id)
+    item = claim.item
+
+    if item.user_id != current_user.id:
+        flash('Only the poster can do that.', 'danger')
+    elif claim.status != 'pending' or item.is_resolved:
+        flash('This claim was already handled.', 'warning')
+    elif action == 'approve':
+        claim.status = 'approved'
+        item.is_resolved = True
+        for other in item.claims:
+            if other.id != claim.id and other.status == 'pending':
+                other.status = 'rejected'
+        db.session.commit()
+        flash('Claim approved. Item marked as resolved.', 'success')
+    elif action == 'reject':
+        claim.status = 'rejected'
+        db.session.commit()
+        flash('Claim rejected.', 'info')
+    else:
+        flash('Invalid action.', 'danger')
+
+    return redirect(url_for('lostfound.item_detail', item_id=item.id))
