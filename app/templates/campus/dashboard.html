@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-1">Campus Hub</h1><p class="text-secondary mb-4">Your student community, all in one place.</p>
+<div class="row g-3 mb-4">
+{% for label,count,icon,endpoint in [('Study resources',resource_count,'📚','campus.study'),('Campus events',event_count,'🎉','campus.events'),('Available listings',listing_count,'🛍️','campus.marketplace'),('Open polls',poll_count,'📊','campus.feedback')] %}
+<div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-dark" href="{{ url_for(endpoint) }}"><div class="card h-100"><div class="card-body p-4"><div class="fs-2">{{ icon }}</div><div class="text-secondary">{{ label }}</div><div class="display-6 fw-bold">{{ count }}</div></div></div></a></div>
+{% endfor %}</div>
+<div class="row g-3">
+<div class="col-md-6"><div class="card"><div class="card-body p-4"><h2 class="h5">📚 Study Hub</h2><p>Share course notes and download useful resources.</p><a class="btn btn-primary" href="{{ url_for('campus.study') }}">Browse resources</a> <a class="btn btn-outline-primary" href="{{ url_for('campus.study_new') }}">Share a file</a></div></div></div>
+<div class="col-md-6"><div class="card"><div class="card-body p-4"><h2 class="h5">🎉 Events & Clubs</h2><p>Find activities, register for events and join clubs.</p><a class="btn btn-primary" href="{{ url_for('campus.events') }}">Explore events</a></div></div></div>
+<div class="col-md-6"><div class="card"><div class="card-body p-4"><h2 class="h5">🛍️ Student Marketplace</h2><p>List or discover used textbooks and campus essentials.</p><a class="btn btn-primary" href="{{ url_for('campus.marketplace') }}">Open marketplace</a></div></div></div>
+<div class="col-md-6"><div class="card"><div class="card-body p-4"><h2 class="h5">📊 Feedback & Polls</h2><p>Vote on campus questions and send feedback.</p><a class="btn btn-primary" href="{{ url_for('campus.feedback') }}">Have your say</a></div></div></div>
+</div>{% endblock %}

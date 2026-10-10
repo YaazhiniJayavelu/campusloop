@@ -1,84 +1,36 @@
-# CampusLoop
+# CampusLoop — integrated feature upgrade
 
-A web app for college students that combines **Lost & Found** and **Skill Exchange** in one platform.
+This upgrade adds four modules to the existing Flask app while retaining Lost & Found and Skill Exchange:
 
-## Features
+- **Study Hub:** searchable subject resources, uploads and downloads.
+- **Campus Events & Clubs:** create events, register/cancel registration, create clubs and join/leave.
+- **Student Marketplace:** searchable listings, optional photos, prices, seller contact by email, mark sold/available, and delete your own listings.
+- **Feedback & Polls:** create polls with 2–10 options, one vote per student per poll, results, close your own poll, and submit categorized feedback (including anonymous submissions).
 
-**Lost & Found**
-- Post lost or found items with a photo, category and location
-- Search and filter by keyword, category and status
-- Suggested matches based on category, keywords and photo similarity (`imagehash`)
-- Claim flow: the owner sends a claim and the finder approves or rejects it
+## Install in one update
 
-**Skill Exchange**
-- Coming soon
-
-## Tech Stack
-
-Python Flask, SQLite, Bootstrap, Flask-Login, Pillow, imagehash
-
-## Installation
-
-**Requirements:** Python 3.10 or newer, and Git.
-
-1. Clone the repository:
-```bash
-   git clone https://github.com/YaazhiniJayavelu/campusloop.git
-   cd campusloop
-```
-
-2. Create a virtual environment:
-```bash
-   python -m venv venv
-```
-
-3. Activate it:
-```bash
-   # Windows
-   venv\Scripts\activate
-
-   # Mac/Linux
-   source venv/bin/activate
-```
-
-4. Install the dependencies:
-```bash
+1. **Back up your existing project folder and `campusloop.db` first.**
+2. Extract this ZIP into your existing project directory, allowing the updated files to replace files with the same names. This ZIP intentionally does **not** include a database file, so your existing `campusloop.db` and student data remain in place.
+3. Activate the same Python virtual environment you use for CampusLoop.
+4. Install dependencies if needed:
+   ```bash
    pip install -r requirements.txt
-```
-
-5. Run the app:
-```bash
+   ```
+5. Start the app as usual:
+   ```bash
    python run.py
-```
+   ```
+6. Open `http://127.0.0.1:5000/`, sign in, and use **Campus Hub** in the navigation. Flask-SQLAlchemy's existing `db.create_all()` creates the new tables automatically when the app starts.
 
-6. Open **http://127.0.0.1:5000** in your browser.
+## Notes
 
-The SQLite database (`campusloop.db`) is created automatically on the first run.
+- File uploads use the app's configured upload folder and existing 5 MB request limit. Study Hub accepts PDF, DOC/DOCX, PPT/PPTX and TXT. Marketplace photos accept PNG, JPG/JPEG, WEBP and GIF.
+- The app stores event date/time as entered in the browser; this initial version does not implement timezone conversion or event reminders.
+- Marketplace seller contact uses the seller's registered email through the visitor's email app; no in-app messaging is included.
+- Feedback is stored in the database. Anonymous submissions do not retain a user ID, and therefore won't appear in the submitter's personal feedback history.
+- This project currently has no CSRF protection or admin moderation workflow. Before public deployment, add CSRF protection, configure a strong `SECRET_KEY` via environment variables, add moderation/admin controls, and review upload/security settings.
+- For privacy and safety, only upload course materials you have permission to share, and don't include private or sensitive information in public posts.
 
-## Usage
+## Existing functionality
 
-1. Register an account and log in
-2. Click **Post Item** to report something lost or found
-3. Open **Lost & Found** to search and filter items
-4. Open your own item to see possible matches
-5. Open someone else's item to send a claim
-
-## Project Structure
-
-```
-campusloop/
-├── app/
-│   ├── auth/          # register, login, profile
-│   ├── lostfound/     # items, claims, matching
-│   ├── templates/
-│   ├── static/uploads/
-│   ├── models.py
-│   └── __init__.py
-├── config.py
-├── run.py
-└── requirements.txt
-```
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file.
+The existing Lost & Found and Skill Exchange blueprints, models, and templates are retained. New database tables are additive; no existing tables are intentionally modified.

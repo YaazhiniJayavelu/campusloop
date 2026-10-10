@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Skill Connections - CampusLoop{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div><h1 class="h2 mb-1">Skill Connections</h1><p class="text-muted mb-0">Manage requests from students and see the requests you've sent.</p></div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('skill.index') }}">Back to skills</a>
+</div>
+<h2 class="h4 mb-3">Incoming requests</h2>
+{% if incoming %}
+  <div class="list-group mb-4">
+  {% for c in incoming %}
+    <div class="list-group-item">
+      <div class="d-flex flex-wrap justify-content-between gap-3">
+        <div><strong>{{ c.sender.name }}</strong>
+          <div class="small text-muted">{{ c.sender.email }} · Sent {{ c.created_at.strftime('%d %b %Y') }}</div>
+          <span class="badge mt-2 {% if c.status == 'accepted' %}text-bg-success{% elif c.status == 'rejected' %}text-bg-secondary{% else %}text-bg-warning{% endif %}">{{ c.status|title }}</span>
+        </div>
+        {% if c.status == 'pending' %}
+        <div class="d-flex align-items-start gap-2">
+          <form method="post" action="{{ url_for('skill.respond_connection', request_id=c.id, action='accept') }}"><button class="btn btn-sm btn-success">Accept</button></form>
+          <form method="post" action="{{ url_for('skill.respond_connection', request_id=c.id, action='reject') }}"><button class="btn btn-sm btn-outline-danger">Decline</button></form>
+        </div>
+        {% elif c.status == 'accepted' %}
+        <form class="d-flex flex-wrap align-items-center gap-2" method="post" action="{{ url_for('skill.rate_user', user_id=c.sender_id) }}">
+          <label class="small" for="rating-in-{{ c.id }}">Rate</label>
+          <select class="form-select form-select-sm" id="rating-in-{{ c.id }}" name="rating" required style="width: auto">
+            <option value="">Stars</option>{% for n in range(5, 0, -1) %}<option value="{{ n }}">{{ n }} / 5</option>{% endfor %}
+          </select>
+          <input class="form-control form-control-sm" name="review" placeholder="Optional review" style="max-width: 180px">
+          <button class="btn btn-sm btn-outline-primary">Save rating</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+  </div>
+{% else %}<p class="text-muted mb-4">No incoming requests yet.</p>{% endif %}
+
+<h2 class="h4 mb-3">Requests you've sent</h2>
+{% if outgoing %}
+  <div class="list-group">
+  {% for c in outgoing %}
+    <div class="list-group-item d-flex flex-wrap justify-content-between gap-2">
+      <div><strong>{{ c.receiver.name }}</strong><div class="small text-muted">{{ c.receiver.email }}</div></div>
+      <span class="badge align-self-center {% if c.status == 'accepted' %}text-bg-success{% elif c.status == 'rejected' %}text-bg-secondary{% else %}text-bg-warning{% endif %}">{{ c.status|title }}</span>
+    </div>
+  {% endfor %}
+  </div>
+{% else %}<p class="text-muted">You haven't sent any connection requests yet.</p>{% endif %}
+{% endblock %}

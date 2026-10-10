@@ -19,6 +19,12 @@ def create_app():
     from app.lostfound.routes import lostfound
     app.register_blueprint(lostfound)
 
+    from app.skill.routes import skill
+    app.register_blueprint(skill)
+
+    from app.campus.routes import campus
+    app.register_blueprint(campus)
+
     from app import models
     with app.app_context():
         db.create_all()

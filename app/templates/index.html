@@ -1,5 +1,117 @@
+
 {% extends 'base.html' %}
+
+{% block title %}CampusLoop | Your campus, connected{% endblock %}
+
 {% block content %}
-<h1>Welcome to CampusLoop</h1>
-<p class="lead">Lost &amp; Found and Skill Exchange for students.</p>
+
+<section class="hero-panel mb-4 mb-lg-5">
+  <span class="hero-kicker">YOUR CAMPUS, CONNECTED</span>
+
+  <h1 class="display-5 fw-bold mb-3">
+    Make campus life<br class="d-none d-sm-block">
+    work better for you.
+  </h1>
+
+  <p class="lead mb-4">
+    One student community to find what you need, share what you know,
+    discover events and build meaningful campus connections.
+  </p>
+
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-light btn-lg"
+       href="{{ url_for('campus.dashboard') }}">
+      Explore Campus Hub
+    </a>
+
+    <a class="btn btn-quiet btn-lg"
+       href="{{ url_for('lostfound.items') }}">
+      Browse Lost &amp; Found
+    </a>
+  </div>
+</section>
+
+<section aria-labelledby="features-heading">
+  <div class="section-heading">
+    <div>
+      <span class="hero-kicker text-primary mb-1">
+        EXPLORE THE PLATFORM
+      </span>
+
+      <h2 id="features-heading" class="h3 mb-1">
+        Everything in one place
+      </h2>
+
+      <p>Tools built around everyday student life.</p>
+    </div>
+  </div>
+
+  <div class="row g-3 g-lg-4">
+
+    {% for title, desc, link, eyebrow in [
+      (
+        'Lost & Found',
+        'Report misplaced belongings and reconnect found items with their owners.',
+        url_for('lostfound.items'),
+        'COMMUNITY'
+      ),
+      (
+        'Skill Exchange',
+        'Share your strengths, learn from classmates and build useful connections.',
+        url_for('skill.index'),
+        'COLLABORATION'
+      ),
+      (
+        'Study Hub',
+        'Find course notes and share useful study resources with other students.',
+        url_for('campus.study'),
+        'LEARNING'
+      ),
+      (
+        'Events & Clubs',
+        'Discover campus activities, register for events and find your community.',
+        url_for('campus.events'),
+        'CAMPUS LIFE'
+      ),
+      (
+        'Student Marketplace',
+        'Explore affordable campus essentials listed by fellow students.',
+        url_for('campus.marketplace'),
+        'STUDENT MARKET'
+      ),
+      (
+        'Feedback & Polls',
+        'Take part in campus polls and share feedback with the community.',
+        url_for('campus.feedback'),
+        'YOUR VOICE'
+      )
+    ] %}
+
+    <div class="col-12 col-sm-6 col-xl-4">
+      <article class="card feature-card">
+        <div class="card-body d-flex flex-column align-items-start">
+
+          <span class="badge text-bg-light border text-primary mb-3">
+            {{ eyebrow }}
+          </span>
+
+          <h3 class="h5 mb-2">{{ title }}</h3>
+
+          <p class="mb-4">{{ desc }}</p>
+
+          <a href="{{ link }}"
+             class="btn btn-outline-primary feature-link">
+            Explore section
+            <span aria-hidden="true">&rarr;</span>
+          </a>
+
+        </div>
+      </article>
+    </div>
+
+    {% endfor %}
+
+  </div>
+</section>
+
 {% endblock %}

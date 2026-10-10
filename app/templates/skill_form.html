@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{% if post %}Edit{% else %}{{ 'Offer' if post_type == 'offer' else 'Request' }}{% endif %} a Skill - CampusLoop{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <a class="text-decoration-none" href="{{ url_for('skill.index') }}">← Back to Skill Exchange</a>
+    <div class="card shadow-sm mt-3">
+      <div class="card-body p-4">
+        <h1 class="h3 mb-2">{% if post %}Edit skill post{% else %}{{ 'Offer a Skill' if post_type == 'offer' else 'Request a Skill' }}{% endif %}</h1>
+        <p class="text-muted">{% if post_type == 'offer' %}Tell students what you can teach or share.{% else %}Tell students what you'd like to learn.{% endif %}</p>
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label" for="skill_name">Skill name <span class="text-danger">*</span></label>
+            <input class="form-control" id="skill_name" name="skill_name" maxlength="100" required value="{{ post.skill_name if post else request.form.get('skill_name', '') }}" placeholder="e.g. Python programming">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="description">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="5" placeholder="Add details, experience level, preferred schedule, or what you hope to learn.">{{ post.description if post else request.form.get('description', '') }}</textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">{{ 'Save changes' if post else 'Publish post' }}</button>
+          <a class="btn btn-outline-secondary ms-2" href="{{ url_for('skill.index') }}">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

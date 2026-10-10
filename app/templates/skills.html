@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Skill Exchange - CampusLoop{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <h1 class="h2 mb-1">Skill Exchange</h1>
+    <p class="text-muted mb-0">Share what you know. Learn something new. Connect with students.</p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    {% if current_user.is_authenticated %}
+      <a class="btn btn-primary" href="{{ url_for('skill.new_post', post_type='offer') }}">＋ Offer a Skill</a>
+      <a class="btn btn-outline-primary" href="{{ url_for('skill.new_post', post_type='request') }}">＋ Request a Skill</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('skill.connections') }}">Connections</a>
+    {% else %}
+      <a class="btn btn-primary" href="{{ url_for('auth.login', next=url_for('skill.index')) }}">Log in to post</a>
+      <a class="btn btn-outline-primary" href="{{ url_for('auth.register') }}">Register</a>
+    {% endif %}
+  </div>
+</div>
+
+<form class="card card-body mb-4" method="get" action="{{ url_for('skill.index') }}">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-6">
+      <label class="form-label" for="q">Search skills or students</label>
+      <input class="form-control" id="q" name="q" value="{{ keyword }}" placeholder="e.g. Python, guitar, design">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="type">Post type</label>
+      <select class="form-select" id="type" name="type">
+        <option value="all" {% if post_type == 'all' %}selected{% endif %}>All posts</option>
+        <option value="offer" {% if post_type == 'offer' %}selected{% endif %}>Skills offered</option>
+        <option value="request" {% if post_type == 'request' %}selected{% endif %}>Skills requested</option>
+      </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <button class="btn btn-dark flex-grow-1" type="submit">Search</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('skill.index') }}">Clear</a>
+    </div>
+  </div>
+</form>
+
+{% if posts %}
+  <div class="row g-3">
+    {% for post in posts %}
+    <div class="col-md-6 col-xl-4">
+      <article class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <span class="badge {% if post.post_type == 'offer' %}text-bg-success{% else %}text-bg-info{% endif %}">
+              {% if post.post_type == 'offer' %}Offering{% else %}Looking to learn{% endif %}
+            </span>
+            <small class="text-muted">{{ post.created_at.strftime('%d %b %Y') }}</small>
+          </div>
+          <h2 class="h5">{{ post.skill_name }}</h2>
+          <p class="text-secondary flex-grow-1" style="white-space: pre-wrap;">{{ post.description or 'No description provided.' }}</p>
+          <div class="border-top pt-3 mt-2">
+            <div class="small mb-3"><strong>{{ post.user.name }}</strong>
+              {% if post.user.department %}<span class="text-muted"> · {{ post.user.department }}</span>{% endif %}
+              {% if post.user.year %}<span class="text-muted"> · {{ post.user.year }}</span>{% endif %}
+            </div>
+            {% if current_user.is_authenticated and post.user_id == current_user.id %}
+              <div class="d-flex gap-2">
+                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('skill.edit_post', post_id=post.id) }}">Edit</a>
+                <form method="post" action="{{ url_for('skill.delete_post', post_id=post.id) }}" onsubmit="return confirm('Delete this skill post?');">
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                </form>
+              </div>
+            {% elif current_user.is_authenticated %}
+              <form method="post" action="{{ url_for('skill.connect', post_id=post.id) }}">
+                <button class="btn btn-sm btn-outline-primary" type="submit">Connect with {{ post.user.name }}</button>
+              </form>
+            {% else %}
+              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('auth.login', next=url_for('skill.index')) }}">Log in to connect</a>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center border rounded-3 p-5">
+    <h2 class="h5">No skill posts found yet</h2>
+    <p class="text-muted">Try another search, or be the first to share a skill with your campus.</p>
+    {% if current_user.is_authenticated %}
+      <a class="btn btn-primary me-2" href="{{ url_for('skill.new_post', post_type='offer') }}">Offer a Skill</a>
+      <a class="btn btn-outline-primary" href="{{ url_for('skill.new_post', post_type='request') }}">Request a Skill</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}
